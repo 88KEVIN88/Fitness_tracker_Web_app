@@ -33,7 +33,7 @@ if ($stmt) {
     </div>
     <div class="mb-3">
         <a href="add_scheda.php" class="btn btn-primary">Nuova scheda</a>
-        <a href="add_exercise.php" class="btn btn-success">Aggiungi esercizis</a>
+        <a href="add_exercise.php" class="btn btn-success">Aggiungi esercizio</a>
         <a href="log_exercise.php" class="btn btn-warning">Registra esercizio</a>
         <a href="exercise_history.php" class="btn btn-info">Storico</a>
     </div>
