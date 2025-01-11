@@ -24,28 +24,28 @@ $history = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="it">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Exercise History</title>
+    <title>Storico Esercizi</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>Exercise History</h1>
-        <a href="dashboard.php" class="btn btn-secondary">Back to Dashboard</a>
+        <h1>Storico Esercizi</h1>
+        <a href="dashboard.php" class="btn btn-secondary">Torna alla Dashboard</a>
     </div>
 
     <?php if (!empty($history)): ?>
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th>Date</th>
+                    <th>Data</th>
                     <th>Scheda</th>
-                    <th>Exercise</th>
-                    <th>Weight Used (kg)</th>
-                    <th>Reps Completed</th>
+                    <th>Esercizio</th>
+                    <th>Carico Utilizzato (kg)</th>
+                    <th>Ripetizioni Eseguite</th>
                 </tr>
             </thead>
             <tbody>
@@ -61,7 +61,7 @@ $history = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             </tbody>
         </table>
     <?php else: ?>
-        <p class="text-center">No exercise history found.</p>
+        <p class="text-center">Nessuno storico degli esercizi trovato.</p>
     <?php endif; ?>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

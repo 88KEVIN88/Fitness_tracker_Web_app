@@ -3,22 +3,22 @@ include '../config/db.php';
 
 // Controlla la connessione al database
 if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+    die("Connessione fallita: " . $conn->connect_error);
 }
 
 // Recupera gli esercizi
 $result = $conn->query("SELECT * FROM esercizo");
 if (!$result) {
-    die("Error fetching exercises: " . $conn->error);
+    die("Errore nel recupero degli esercizi: " . $conn->error);
 }
 $exercises = $result->fetch_all(MYSQLI_ASSOC);
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="it">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add New Scheda</title>
+    <title>Aggiungi Nuova Scheda</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Optional: Font Awesome for icons -->
@@ -26,20 +26,23 @@ $exercises = $result->fetch_all(MYSQLI_ASSOC);
 </head>
 <body>
     <div class="container mt-5">
-        <h1 class="mb-4 text-center">Create a New Scheda</h1>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Crea una nuova scheda</h1>
+        <a href="dashboard.php" class="btn btn-secondary">Torna alla Dashboard</a>
+    </div>
         <form method="POST" action="../handlers/addSchedaHandler.php" class="p-4 border rounded shadow-sm bg-light">
             <div class="mb-3">
-                <label for="title" class="form-label">Scheda Title:</label>
+                <label for="title" class="form-label">Titolo della Scheda:</label>
                 <input type="text" id="title" name="title" class="form-control" required>
             </div>
 
             <div class="mb-3">
-                <label for="description" class="form-label">Description:</label>
+                <label for="description" class="form-label">Descrizione:</label>
                 <textarea id="description" name="description" class="form-control" rows="3" required></textarea>
             </div>
 
             <div class="mb-3">
-                <label for="exercises" class="form-label">Select Exercises:</label>
+                <label for="exercises" class="form-label">Seleziona Esercizi:</label>
                 <select id="exercises" name="exercises[]" class="form-select" multiple required>
                     <?php foreach ($exercises as $exercise): ?>
                         <option value="<?= htmlspecialchars($exercise['id_esercizio']) ?>">
@@ -49,7 +52,7 @@ $exercises = $result->fetch_all(MYSQLI_ASSOC);
                 </select>
             </div>
 
-            <button type="submit" class="btn btn-primary w-100">Create Scheda</button>
+            <button type="submit" class="btn btn-primary w-100">Crea Scheda</button>
         </form>
     </div>
 
