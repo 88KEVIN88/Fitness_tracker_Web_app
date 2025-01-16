@@ -21,43 +21,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         die("All fields are required.");
     }
 
+    $conn->beginTransaction();
+
     try {
-        $conn->beginTransaction();
-
-        // If a new description is provided, add it to esercizi_descrizione table
+        // Se una nuova descrizione è stata fornita, aggiungila nella tabella esercizi_descrizione
         if (!empty($newDescription)) {
-            $stmtDescription = $conn->prepare("INSERT INTO esercizi_descrizione (nome_esercizio, descrizione_esecuzione) VALUES (:nome, :descrizione)");
-            
-            $stmtDescription->execute([
-                ':nome' => $exerciseName,
-                ':descrizione' => $newDescription
-            ]);
+            $stmtDescription = $conn->prepare("INSERT INTO esercizi_descrizione (nome_esercizio, descrizione_esecuzione) VALUES (?, ?)");
+            if (!$stmtDescription) {
+                throw new Exception("Error preparing statement for new description: " . $conn->error);
+            }
 
-            // Get the ID of the new description
-            $descriptionId = $conn->lastInsertId();
+            $stmtDescription->bind_param("ss", $exerciseName, $newDescription);
+            $stmtDescription->execute();
+
+            // Recupera l'ID della nuova descrizione
+            $descriptionId = $stmtDescription->insert_id;
         }
 
-        // Insert exercise into esercizo table
+        // Inserisci l'esercizio nella tabella esercizo
         $stmtExercise = $conn->prepare(
             "INSERT INTO esercizo (nome, descrizione, serie_predefinite, ripetizioni_predefinite, id_tipo, id_descrizionee) 
-            VALUES (:nome, :descrizione, :serie, :ripetizioni, :tipo, :desc_id)"
+            VALUES (?, ?, ?, ?, ?, ?)"
         );
+        if (!$stmtExercise) {
+            throw new Exception("Error preparing statement for exercise: " . $conn->error);
+        }
 
-        $stmtExercise->execute([
-            ':nome' => $exerciseName,
-            ':descrizione' => $description,
-            ':serie' => $series,
-            ':ripetizioni' => $repetitions,
-            ':tipo' => $typeId,
-            ':desc_id' => $descriptionId
-        ]);
+        $stmtExercise->bind_param("ssiiii", $exerciseName, $description, $series, $repetitions, $typeId, $descriptionId);
+        $stmtExercise->execute();
 
         $conn->commit();
         header('Location: ../views/dashboard.php');
         exit;
-        
-    } catch (PDOException $e) {
-        $conn->rollBack();
+    } catch (Exception $e) {
+        $conn->rollback();
         die("Transaction failed: " . $e->getMessage());
     }
 }
