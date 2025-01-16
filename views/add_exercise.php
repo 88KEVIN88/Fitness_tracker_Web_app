@@ -60,15 +60,30 @@
                     <?php endforeach; ?>
                 </select>
             </div>
-
             <div class="mb-3">
                 <label for="description_id" class="form-label">Descrizione Esercizio:</label>
                 <select id="description_id" name="description_id" class="form-select">
+                    <option value="new">Nuova Descrizione</option>
                     <?php foreach ($descriptions as $description): ?>
                         <option value="<?= htmlspecialchars($description['id_descrizione']) ?>"><?= htmlspecialchars($description['nome_esercizio']) ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
+            <div class="mb-3" id="new_description_container" style="display: none;">
+                <label for="new_description" class="form-label">Nuova Descrizione:</label>
+                <textarea id="new_description" name="new_description" class="form-control" rows="3"></textarea>
+            </div>
+
+            <script>
+                document.getElementById('description_id').addEventListener('change', function() {
+                    var newDescriptionContainer = document.getElementById('new_description_container');
+                    if (this.value === 'new') {
+                        newDescriptionContainer.style.display = 'block';
+                    } else {
+                        newDescriptionContainer.style.display = 'none';
+                    }
+                });
+            </script>
 
             <div class="mb-3">
                 <label for="new_description" class="form-label">Nuova Descrizione (opzionale):</label>
