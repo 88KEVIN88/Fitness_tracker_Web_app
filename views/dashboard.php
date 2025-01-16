@@ -8,14 +8,13 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 $userId = $_SESSION['user_id'];
-$stmt = $conn->prepare("SELECT * FROM scheda WHERE id_utente = ?");
-if ($stmt) {
-    $stmt->bind_param("i", $userId);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $schede = $result->fetch_all(MYSQLI_ASSOC);
-} else {
-    die("Error preparing statement: " . $conn->error);
+
+try {
+    $stmt = $conn->prepare("SELECT * FROM scheda WHERE id_utente = :userId");
+    $stmt->execute([':userId' => $userId]);
+    $schede = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    die("Error preparing statement: " . $e->getMessage());
 }
 ?>
 <!DOCTYPE html>
@@ -44,35 +43,27 @@ if ($stmt) {
                 <p><?= htmlspecialchars($scheda['descrizione']) ?></p>
                 <ul class="list-group mt-2">
                     <?php
-                    $stmtExercises = $conn->prepare(
-                        "SELECT e.nome, e.descrizione, c.carico_iniziale FROM carico c 
-                        JOIN esercizo e ON c.id_esercizio = e.id_esercizio 
-                        WHERE c.id_scheda = ?"
-                    );
-                    if ($stmtExercises) {
-                        $stmtExercises->bind_param("i", $scheda['id_scheda']);
-                        $stmtExercises->execute();
-                        $resultExercises = $stmtExercises->get_result();
-                        $exercises = $resultExercises->fetch_all(MYSQLI_ASSOC);
-
-                        if (!empty($exercises)) {
-                            foreach ($exercises as $exercise): ?>
-                                <li class="list-group-item">
-                                    <strong><?= htmlspecialchars($exercise['nome']) ?>:</strong> <?= htmlspecialchars($exercise['descrizione']) ?>
-                                    (Carico iniziale <?= htmlspecialchars($exercise['carico_iniziale']) ?> kg)
-                                </li>
-                            <?php endforeach;
-                        } else {
-                            echo "<li class='list-group-item'>No exercises found for this scheda.</li>";
-                        }
-                    } else {
-                        echo "<li class='list-group-item'>Error retrieving exercises.</li>";
+                    try {
+                        $stmtExercises = $conn->prepare(
+                            "SELECT e.nome, e.descrizione, c.carico_iniziale 
+                             FROM carico c 
+                             JOIN esercizo e ON c.id_esercizio = e.id_esercizio 
+                             WHERE c.id_scheda = :schedaId"
+                        );
+                        $stmtExercises->execute([':schedaId' => $scheda['id_scheda']]);
+                        $exercises = $stmtExercises->fetchAll(PDO::FETCH_ASSOC);
+                    } catch (PDOException $e) {
+                        die("Error fetching exercises: " . $e->getMessage());
                     }
                     ?>
+                    <?php foreach ($exercises as $exercise): ?>
+                        <li class="list-group-item">
+                            <strong><?= htmlspecialchars($exercise['nome']) ?>:</strong> <?= htmlspecialchars($exercise['descrizione']) ?> (Carico iniziale: <?= htmlspecialchars($exercise['carico_iniziale']) ?>)
+                        </li>
+                    <?php endforeach; ?>
                 </ul>
             </li>
         <?php endforeach; ?>
     </ul>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

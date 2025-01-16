@@ -1,17 +1,13 @@
 <?php
 include '../config/db.php';
 
-// Controlla la connessione al database
-if ($conn->connect_error) {
-    die("Connessione fallita: " . $conn->connect_error);
+try {
+    // Recupera gli esercizi
+    $stmt = $conn->query("SELECT * FROM esercizo");
+    $exercises = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    die("Errore nel recupero degli esercizi: " . $e->getMessage());
 }
-
-// Recupera gli esercizi
-$result = $conn->query("SELECT * FROM esercizo");
-if (!$result) {
-    die("Errore nel recupero degli esercizi: " . $conn->error);
-}
-$exercises = $result->fetch_all(MYSQLI_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="it">
@@ -45,18 +41,13 @@ $exercises = $result->fetch_all(MYSQLI_ASSOC);
                 <label for="exercises" class="form-label">Seleziona Esercizi:</label>
                 <select id="exercises" name="exercises[]" class="form-select" multiple required>
                     <?php foreach ($exercises as $exercise): ?>
-                        <option value="<?= htmlspecialchars($exercise['id_esercizio']) ?>">
-                            <?= htmlspecialchars($exercise['nome']) ?> - <?= htmlspecialchars($exercise['descrizione']) ?>
-                        </option>
+                        <option value="<?= htmlspecialchars($exercise['id_esercizio']) ?>"><?= htmlspecialchars($exercise['nome']) ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
 
-            <button type="submit" class="btn btn-primary w-100">Crea Scheda</button>
+            <button type="submit" class="btn btn-primary">Crea Scheda</button>
         </form>
     </div>
-
-    <!-- Bootstrap Bundle with Popper -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

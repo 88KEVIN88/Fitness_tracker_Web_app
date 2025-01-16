@@ -9,18 +9,21 @@ if (!isset($_SESSION['user_id'])) {
 
 $userId = $_SESSION['user_id'];
 
-// Recupera lo storico degli esercizi dell'utente
-$stmt = $conn->prepare(
-    "SELECT s.titolo AS scheda, e.nome AS esercizio, se.data_esecuzione, se.carico_utilizzato, se.ripetizioni_eseguite 
-     FROM storico_esercizi se
-     JOIN scheda s ON se.id_scheda = s.id_scheda
-     JOIN esercizo e ON se.id_esercizio = e.id_esercizio
-     WHERE se.id_utente = ?
-     ORDER BY se.data_esecuzione DESC"
-);
-$stmt->bind_param("i", $userId);
-$stmt->execute();
-$history = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+try {
+    // Recupera lo storico degli esercizi dell'utente
+    $stmt = $conn->prepare(
+        "SELECT s.titolo AS scheda, e.nome AS esercizio, se.data_esecuzione, se.carico_utilizzato, se.ripetizioni_eseguite 
+         FROM storico_esercizi se
+         JOIN scheda s ON se.id_scheda = s.id_scheda
+         JOIN esercizo e ON se.id_esercizio = e.id_esercizio
+         WHERE se.id_utente = :userId
+         ORDER BY se.data_esecuzione DESC"
+    );
+    $stmt->execute([':userId' => $userId]);
+    $history = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    die("Error fetching exercise history: " . $e->getMessage());
+}
 ?>
 
 <!DOCTYPE html>
@@ -49,21 +52,19 @@ $history = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($history as $record): ?>
+                <?php foreach ($history as $entry): ?>
                     <tr>
-                        <td><?= htmlspecialchars($record['data_esecuzione']) ?></td>
-                        <td><?= htmlspecialchars($record['scheda']) ?></td>
-                        <td><?= htmlspecialchars($record['esercizio']) ?></td>
-                        <td><?= htmlspecialchars($record['carico_utilizzato']) ?></td>
-                        <td><?= htmlspecialchars($record['ripetizioni_eseguite']) ?></td>
+                        <td><?= htmlspecialchars($entry['data_esecuzione']) ?></td>
+                        <td><?= htmlspecialchars($entry['scheda']) ?></td>
+                        <td><?= htmlspecialchars($entry['esercizio']) ?></td>
+                        <td><?= htmlspecialchars($entry['carico_utilizzato']) ?></td>
+                        <td><?= htmlspecialchars($entry['ripetizioni_eseguite']) ?></td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>
         </table>
     <?php else: ?>
-        <p class="text-center">Nessuno storico degli esercizi trovato.</p>
+        <p>Nessun esercizio registrato.</p>
     <?php endif; ?>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

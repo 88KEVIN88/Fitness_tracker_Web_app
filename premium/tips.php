@@ -7,8 +7,12 @@ if ($_SESSION['role'] !== 'premium') {
     die("Access denied!");
 }
 
-$result = $conn->query("SELECT * FROM tips");
-$tips = $result->fetch_all(MYSQLI_ASSOC);
+try {
+    $stmt = $conn->query("SELECT * FROM tips");
+    $tips = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    die("Error: " . $e->getMessage());
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -21,7 +25,7 @@ $tips = $result->fetch_all(MYSQLI_ASSOC);
     <h1>Trainer Tips</h1>
     <ul>
         <?php foreach ($tips as $tip): ?>
-            <li><strong><?= $tip['exercise'] ?>:</strong> <?= $tip['advice'] ?></li>
+            <li><strong><?= htmlspecialchars($tip['exercise']) ?>:</strong> <?= htmlspecialchars($tip['advice']) ?></li>
         <?php endforeach; ?>
     </ul>
 </body>

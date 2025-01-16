@@ -18,19 +18,17 @@
         <?php
         include '../config/db.php';
 
-        // Recupera i tipi di esercizio dalla tabella tipo_esercizio
-        $resultTypes = $conn->query("SELECT id_tipo, nome_tipo FROM tipo_esercizio");
-        if (!$resultTypes) {
-            die("Errore nel recupero dei tipi di esercizio: " . $conn->error);
-        }
-        $types = $resultTypes->fetch_all(MYSQLI_ASSOC);
+        try {
+            // Recupera i tipi di esercizio dalla tabella tipo_esercizio
+            $stmtTypes = $conn->query("SELECT id_tipo, nome_tipo FROM tipo_esercizio");
+            $types = $stmtTypes->fetchAll(PDO::FETCH_ASSOC);
 
-        // Recupera le descrizioni degli esercizi dalla tabella esercizi_descrizione
-        $resultDescriptions = $conn->query("SELECT id_descrizione, nome_esercizio FROM esercizi_descrizione");
-        if (!$resultDescriptions) {
-            die("Errore nel recupero delle descrizioni degli esercizi: " . $conn->error);
+            // Recupera le descrizioni degli esercizi dalla tabella esercizi_descrizione
+            $stmtDescriptions = $conn->query("SELECT id_descrizione, nome_esercizio FROM esercizi_descrizione");
+            $descriptions = $stmtDescriptions->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            die("Errore nel recupero dei dati: " . $e->getMessage());
         }
-        $descriptions = $resultDescriptions->fetch_all(MYSQLI_ASSOC);
         ?>
         <form method="POST" action="../handlers/addExerciseHandler.php" class="p-4 border rounded shadow-sm bg-light">
             <div class="mb-3">
@@ -46,11 +44,11 @@
             <div class="row mb-3">
                 <div class="col-md-6">
                     <label for="series" class="form-label">Serie Predefinite:</label>
-                    <input type="number" id="series" name="series" class="form-control" required min="1">
+                    <input type="number" id="series" name="series" class="form-control" required>
                 </div>
                 <div class="col-md-6">
                     <label for="repetitions" class="form-label">Ripetizioni Predefinite:</label>
-                    <input type="number" id="repetitions" name="repetitions" class="form-control" required min="1">
+                    <input type="number" id="repetitions" name="repetitions" class="form-control" required>
                 </div>
             </div>
 
@@ -58,35 +56,27 @@
                 <label for="type_id" class="form-label">Tipo di Esercizio:</label>
                 <select id="type_id" name="type_id" class="form-select" required>
                     <?php foreach ($types as $type): ?>
-                        <option value="<?= htmlspecialchars($type['id_tipo']) ?>">
-                            <?= htmlspecialchars($type['nome_tipo']) ?>
-                        </option>
+                        <option value="<?= htmlspecialchars($type['id_tipo']) ?>"><?= htmlspecialchars($type['nome_tipo']) ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
 
             <div class="mb-3">
-                <label for="description_id" class="form-label">Descrizione Dettagliata:</label>
+                <label for="description_id" class="form-label">Descrizione Esercizio:</label>
                 <select id="description_id" name="description_id" class="form-select">
-                    <option value="">-- Aggiungi Nuova Descrizione --</option>
                     <?php foreach ($descriptions as $description): ?>
-                        <option value="<?= htmlspecialchars($description['id_descrizione']) ?>">
-                            <?= htmlspecialchars($description['nome_esercizio']) ?>
-                        </option>
+                        <option value="<?= htmlspecialchars($description['id_descrizione']) ?>"><?= htmlspecialchars($description['nome_esercizio']) ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
 
             <div class="mb-3">
-                <label for="new_description" class="form-label">Nuova Descrizione Dettagliata (se non elencata sopra):</label>
+                <label for="new_description" class="form-label">Nuova Descrizione (opzionale):</label>
                 <textarea id="new_description" name="new_description" class="form-control" rows="3"></textarea>
             </div>
 
-            <button type="submit" class="btn btn-primary w-100">Aggiungi Esercizio</button>
+            <button type="submit" class="btn btn-primary">Aggiungi Esercizio</button>
         </form>
     </div>
-
-    <!-- Bootstrap Bundle with Popper -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

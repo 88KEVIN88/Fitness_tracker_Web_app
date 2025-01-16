@@ -19,22 +19,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         die("All fields are required.");
     }
 
-    $stmt = $conn->prepare(
-        "INSERT INTO storico_esercizi (id_utente, id_scheda, id_esercizio, data_esecuzione, carico_utilizzato, ripetizioni_eseguite) 
-        VALUES (?, ?, ?, ?, ?, ?)"
-    );
+    try {
+        $stmt = $conn->prepare(
+            "INSERT INTO storico_esercizi (id_utente, id_scheda, id_esercizio, data_esecuzione, carico_utilizzato, ripetizioni_eseguite) 
+            VALUES (:userId, :schedaId, :exerciseId, :executionDate, :weightUsed, :repsCompleted)"
+        );
 
-    if (!$stmt) {
-        die("Error preparing statement: " . $conn->error);
-    }
+        $stmt->execute([
+            ':userId' => $userId,
+            ':schedaId' => $schedaId,
+            ':exerciseId' => $exerciseId,
+            ':executionDate' => $executionDate,
+            ':weightUsed' => $weightUsed,
+            ':repsCompleted' => $repsCompleted
+        ]);
 
-    $stmt->bind_param("iiisdi", $userId, $schedaId, $exerciseId, $executionDate, $weightUsed, $repsCompleted);
-
-    if ($stmt->execute()) {
         header('Location: ../views/dashboard.php');
         exit;
-    } else {
-        die("Error executing query: " . $stmt->error);
+        
+    } catch (PDOException $e) {
+        die("Error executing query: " . $e->getMessage());
     }
 }
 ?>

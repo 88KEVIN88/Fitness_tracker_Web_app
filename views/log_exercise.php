@@ -9,16 +9,18 @@ if (!isset($_SESSION['user_id'])) {
 
 $userId = $_SESSION['user_id'];
 
-// Recupera le schede dell'utente
-$stmt = $conn->prepare("SELECT id_scheda, titolo FROM scheda WHERE id_utente = ?");
-$stmt->bind_param("i", $userId);
-$stmt->execute();
-$schede = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+try {
+    // Recupera le schede dell'utente
+    $stmt = $conn->prepare("SELECT id_scheda, titolo FROM scheda WHERE id_utente = :userId");
+    $stmt->execute([':userId' => $userId]);
+    $schede = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Recupera gli esercizi
-$stmtExercises = $conn->prepare("SELECT id_esercizio, nome FROM esercizo");
-$stmtExercises->execute();
-$exercises = $stmtExercises->get_result()->fetch_all(MYSQLI_ASSOC);
+    // Recupera gli esercizi
+    $stmtExercises = $conn->query("SELECT id_esercizio, nome FROM esercizo");
+    $exercises = $stmtExercises->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    die("Error fetching data: " . $e->getMessage());
+}
 ?>
 
 <!DOCTYPE html>
@@ -59,21 +61,20 @@ $exercises = $stmtExercises->get_result()->fetch_all(MYSQLI_ASSOC);
 
         <div class="mb-3">
             <label for="data_esecuzione" class="form-label">Data di Esecuzione:</label>
-            <input type="date" name="data_esecuzione" id="data_esecuzione" class="form-control" required>
+            <input type="date" id="data_esecuzione" name="data_esecuzione" class="form-control" required>
         </div>
 
         <div class="mb-3">
             <label for="carico_utilizzato" class="form-label">Carico Utilizzato (kg):</label>
-            <input type="number" name="carico_utilizzato" id="carico_utilizzato" class="form-control" step="0.1" required>
+            <input type="number" id="carico_utilizzato" name="carico_utilizzato" class="form-control" required>
         </div>
 
         <div class="mb-3">
             <label for="ripetizioni_eseguite" class="form-label">Ripetizioni Eseguite:</label>
-            <input type="number" name="ripetizioni_eseguite" id="ripetizioni_eseguite" class="form-control" required>
+            <input type="number" id="ripetizioni_eseguite" name="ripetizioni_eseguite" class="form-control" required>
         </div>
 
         <button type="submit" class="btn btn-primary">Registra Esercizio</button>
     </form>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
